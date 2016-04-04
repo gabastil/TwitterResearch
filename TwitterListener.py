@@ -26,6 +26,8 @@ CONSUMER_KEY_SECRET = 'Q1QoWve8HgtMJVy5zybWn3LYc54aTMs9NbqfgVDg7ElvxzjpLv'
 ACCESS_TOKEN 		= '2357328096-AREvcO4bvh8fj1QN6iZVSlHzjGIe1bbaGyamNFB'
 ACCESS_TOKEN_SECRET = '7MAbtODd19EUuAVpjqyDfThkEhcHiFlaFo7zYhhidyG1g'
 
+OUTPUT_PATH	= "data/data.txt"
+
 class TwitterListener(StreamListener):
 
 	"""
@@ -43,23 +45,34 @@ class TwitterListener(StreamListener):
 	"""
 
 	def on_data(self, data):
-		
-		jdata = json.loads(data)
+		"""	Manage new data coming from the Twitter stream
+			@param	data: new data coming from the Twitter stream
+		"""
+
 		#print type(jdata), jdata['text'].decode("UTF-8", "ignore"), jdata['contributors'], jdata['id'], jdata['source']
 		#print u"{0}".format(jdata['text']).encode("utf-8"), "id:\t", jdata['id'], "source:\t", jdata['source']
-		print u"{0}".format(jdata['text']).encode("utf-8"), "id:\t", jdata['id'], "id str:\t", jdata['id_str'], "source:\t", jdata['source']
-		print "User:\t", jdata['user']['id'], "Name:\t", jdata['user']['name'], 
-		print "user:\t", jdata['user'].keys(), "entities:\t", jdata['entities']
-		print jdata.keys()
+		#print u"{0}".format(jdata['text']).encode("utf-8"), "id:\t", jdata['id'], "id str:\t", jdata['id_str'], "source:\t", jdata['source']
+		#print "User:\t", jdata['user']['id'], "Name:\t", jdata['user']['name'], 
+		#print "user:\t", jdata['user'].keys(), "entities:\t", jdata['entities']
+		#print jdata.keys()
 		#print u"\u266", "\u266"
 		#saveFile = open('twitDB.csv','a')
 		#saveFile.write(data)
 		#saveFile.write('\n')
 		#saveFile.close()
+
+		with open(OUTPUT_PATH, 'r') as outputFile:
+			jdata = json.loads(data)
+
+
 		return False
 
 	def on_error(self, status):
+		"""	Print error status to screen
+			@param	status: error status from Twitter stream
+		"""
 		print status
+
 
 if __name__=="__main__":
 	# Configure credentials required by Twitter's OAuthHandler
@@ -67,4 +80,4 @@ if __name__=="__main__":
 	auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 
 	twitterStream = Stream(auth, TwitterListener())
-	twitterStream.filter(track=["ako"])
+	test = twitterStream.filter(track=["ako"])
