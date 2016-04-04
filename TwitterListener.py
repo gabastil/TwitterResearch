@@ -26,6 +26,14 @@ CONSUMER_KEY_SECRET = 'Q1QoWve8HgtMJVy5zybWn3LYc54aTMs9NbqfgVDg7ElvxzjpLv'
 ACCESS_TOKEN 		= '2357328096-AREvcO4bvh8fj1QN6iZVSlHzjGIe1bbaGyamNFB'
 ACCESS_TOKEN_SECRET = '7MAbtODd19EUuAVpjqyDfThkEhcHiFlaFo7zYhhidyG1g'
 
+FIELDS_OF_INTEREST1 = ['text', 'id_str', 'source']
+FIELDS_OF_INTEREST2 = ['user', 'entities']
+
+SUBFIELDS_OF_INTEREST1 = ['id_str', 'name', 'followers_count_str']
+SUBFIELDS_OF_INTEREST2 = ['hashtags', 'user_mentions']
+
+
+
 OUTPUT_PATH	= "data/data.txt"
 
 class TwitterListener(StreamListener):
@@ -63,9 +71,36 @@ class TwitterListener(StreamListener):
 
 		with open(OUTPUT_PATH, 'r') as outputFile:
 			jdata = json.loads(data)
+			"""
+			fieldsOfInterest1 = [jdata[element] for element in jdata.keys() if element in FIELDS_OF_INTEREST1]
 
+			foi2  = [jdata[element] for element in jdata.keys() if element in FIELDS_OF_INTEREST2]
+			foi2u = [foi2[element] for element in foi2[0] if element in SUBFIELDS_OF_INTEREST1]
+			foi2e = [foi2[element] for element in foi2[1] if element in SUBFIELDS_OF_INTEREST2]
+			fieldsOfInterest1 = u"\t".join(fieldsOfInterest1).encode("utf-8")
+			fieldsOfInterest2 = u"\t".join(foi2u).encode("utf-8")
+			fieldsOfInterest3 = u"\t".join(foi2e).encode("utf-8")
 
-		return False
+			outputContent = "\t".join([fieldsOfInterest1, fieldsOfInterest2, fieldsOfInterest3]).replace("\n", "__n__")
+			"""
+			text = jdata['text']
+			tweet_id = jdata['id_str']
+			source = jdata['source']
+
+			user_id	= jdata['user']['id_str']
+			user_name = jdata['user']['name']
+			user_followers_count = jdata['user']['followers_count']
+
+			entities_hashtags = [item['text'] for item in jdata['entities']['hashtags']]
+			entities_hashtags = ", ".join(entities_hashtags)
+			entities_user_mentions =  [item['id_str'] for item in jdata['entities']['user_mentions']]
+			entities_user_mentions =  ", ".join(entities_user_mentions)
+
+			outputContent = u"{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}".format(text, tweet_id, source, user_id, user_name, user_followers_count, entities_hashtags, entities_user_mentions).encode('utf-8')
+
+			self.save(str("\n"+outputContent.replace("\n", "__n__")))
+
+		return True
 
 	def on_error(self, status):
 		"""	Print error status to screen
@@ -73,6 +108,13 @@ class TwitterListener(StreamListener):
 		"""
 		print status
 
+	def save(self, data):
+		"""	Save contents to file
+			@param	data: contents to save
+		"""
+		outputFile = open(OUTPUT_PATH, 'a')
+		outputFile.write(data)
+		outputFile.close()
 
 if __name__=="__main__":
 	# Configure credentials required by Twitter's OAuthHandler
